@@ -3,7 +3,6 @@
 import os
 import OpenGL
 from OpenGL.GL import *
-#from OpenGL.GLUT import *
 
 import cyglfw3 as glfw
 
@@ -166,26 +165,24 @@ def main():
 	startdir = os.getcwd()
 	if not glfw.Init():
 		exit()
+	else:
+		#glfw is badle behaved with our working directory for some reason =(
+		os.chdir(startdir)
 		
 	glfw.WindowHint(glfw.CONTEXT_VERSION_MAJOR, 3)
 	glfw.WindowHint(glfw.CONTEXT_VERSION_MINOR, 3)
 	glfw.WindowHint(glfw.OPENGL_FORWARD_COMPAT, GL_TRUE)
 	glfw.WindowHint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
-	window = glfw.CreateWindow(RESOLUTION[0], RESOLUTION[1], 'Hello World')
-	if not window:
-		glfw.Terminate()
-		exit()
-	
-	glfw.MakeContextCurrent(window)
-	
-	#glfw is badle behaved with out working directory for some reason =(
-	os.chdir(startdir)
-	quadFuncs = setupquaddemo("happy_face.frag")
-	quadRender,quadCleanup = quadFuncs[:3],quadFuncs[3]
-	
-	renderloop(window, [quadRender])
-	quadCleanup()
-	
+	window = glfw.CreateWindow(RESOLUTION[0], RESOLUTION[1], 'OpenGL Tut')
+	if window:
+		glfw.MakeContextCurrent(window)
+		
+		quadFuncs = setupquaddemo("shaunplasma.frag")
+		quadRender,quadCleanup = quadFuncs[:3],quadFuncs[3]
+		
+		renderloop(window, [quadRender])
+		quadCleanup()
+		
 	glfw.Terminate()
 
 # call main
