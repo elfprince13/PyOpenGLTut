@@ -25,8 +25,8 @@ def compileshader(src, kind):
 		print "Received the following length-%d log message:\n\t%s" % (infoLen, infoLog)
 		glDeleteShader(shader)
 		shader = 0
-	
-	return shader
+	else:
+		return shader
 def setupquaddemo(fragFile):
 	vert_shader = 0
 	with open(os.path.abspath("./shaders/justaquad/supersimple.vert"),'r') as vertH:
@@ -38,7 +38,13 @@ def setupquaddemo(fragFile):
 		shader_src = vertH.read()
 		frag_shader = compileshader(shader_src, GL_FRAGMENT_SHADER)
 		
-	if vert_shader and frag_shader:
+	if (not vert_shader) or (not frag_shader):		
+		if glIsShader(vert_shader): glDeleteShader(vert_shader)
+		if glIsShader(frag_shader): glDeleteShader(frag_shader)
+		print "Shader creation failed"
+		exit()
+
+	else:
 		program = glCreateProgram()
 		
 		if not program:
@@ -116,6 +122,9 @@ def setupquaddemo(fragFile):
 					glDeleteBuffers(1,numpy.array(vboID))
 					glDeleteBuffers(1,numpy.array(iboID))
 					glDeleteVertexArrays(1,numpy.array(vaoID))
+					glDeleteProgram(program)
+					glDeleteShader(vert_shader)
+					glDeleteShader(frag_shader)
 					
 				preRender(0, RESOLUTION)
 				glValidateProgram(program)
@@ -123,7 +132,6 @@ def setupquaddemo(fragFile):
 				if not validation:
 					infoLen = glGetProgramiv(program, GL_INFO_LOG_LENGTH)
 					infoLog = glGetProgramInfoLog(program);
-					glDeleteProgram(program)
 					postRender()
 					cleanup()
 					print "Couldn't validate program"
@@ -133,13 +141,6 @@ def setupquaddemo(fragFile):
 					postRender()
 					
 				return (preRender, render, postRender, cleanup)
-
-		
-	else:
-		if glIsShader(vert_shader): glDeleteShader(vert_shader)
-		if glIsShader(frag_shader): glDeleteShader(frag_shader)
-		print "Shader creation failed"
-		exit()
 
 def renderloop(window, renderables):
 	startTime = time.time()
