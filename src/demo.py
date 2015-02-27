@@ -75,29 +75,31 @@ def setupquaddemo(fragFile):
 					1, 1,
 					0, 1,
 				]
-				quadIndices = [
-					0,1,2,
-					2,3,0
-				]
-				
-				vaoID = glGenVertexArrays(1)
-				glBindVertexArray(vaoID)
-				
 				vboID = glGenBuffers(1)
 				glBindBuffer(GL_ARRAY_BUFFER, vboID)
 				vertexData = numpy.array(quadVerts, numpy.float32)
 				glBufferData(GL_ARRAY_BUFFER,  4*len(vertexData), vertexData, GL_STATIC_DRAW)
-				glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, None)
-				glEnableVertexAttribArray(0)
-				
 				glBindBuffer(GL_ARRAY_BUFFER, 0)
 				
+				quadIndices = [
+					0,1,2,
+					2,3,0
+				]
 				iboID = glGenBuffers(1)
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboID)
 				indexData = numpy.array(quadIndices, numpy.byte)
 				glBufferData(GL_ELEMENT_ARRAY_BUFFER, len(indexData), indexData, GL_STATIC_DRAW)
-				
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+
+				
+				vaoID = glGenVertexArrays(1)
+				glBindVertexArray(vaoID)
+				
+				glBindBuffer(GL_ARRAY_BUFFER, vboID)
+				glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, None)
+				glEnableVertexAttribArray(0)
+				glBindBuffer(GL_ARRAY_BUFFER, 0)
+				
 				glBindVertexArray(0)
 				
 				def preRender(time, resolution):
