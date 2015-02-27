@@ -36,6 +36,7 @@ def compileshader(src, kind):
 		return shader
 def setupquaddemo(fragFile, texFile=None):
 	texID = 0
+	linearFiltering = 0
 	if texFile:
 		dims, pixels = getRawImage(texFile)
 		
@@ -86,10 +87,7 @@ def setupquaddemo(fragFile, texFile=None):
 				print "Received the following length-%d log message:\n\t%s" % (infoLen, infoLog)
 				exit()
 			else:
-				iChannel0 = -1
-				if texID:
-					iChannel0 = glGetUniformLocation(program, 'iChannel0')
-					print iChannel0
+				iChannel0 = glGetUniformLocation(program, 'iChannel0')  if texID else -1
 				iResolutionUniform = glGetUniformLocation(program, 'iResolution')
 				iGlobalTimeUniform = glGetUniformLocation(program, 'iGlobalTime')
 				
@@ -157,6 +155,7 @@ def setupquaddemo(fragFile, texFile=None):
 					glDeleteBuffers(1,numpy.array(iboID))
 					glBindTexture(GL_TEXTURE_1D, 0)
 					glDeleteTextures(numpy.array(texID))
+					glDeleteSamplers(1,numpy.array(linearFiltering))
 					glDeleteVertexArrays(1,numpy.array(vaoID))
 					glDeleteProgram(program)
 					glDeleteShader(vert_shader)
