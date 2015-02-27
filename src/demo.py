@@ -139,8 +139,7 @@ def setupquaddemo(fragFile):
 					exit()
 				else:
 					postRender()
-					
-				return (preRender, render, postRender, cleanup)
+					return (preRender, render, postRender, cleanup)
 
 def renderloop(window, renderables):
 	startTime = time.time()
