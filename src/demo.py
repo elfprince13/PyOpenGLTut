@@ -69,25 +69,23 @@ def setupquaddemo(fragFile):
 				iResolutionUniform = glGetUniformLocation(program, 'iResolution')
 				iGlobalTimeUniform = glGetUniformLocation(program, 'iGlobalTime')
 				
-				quadVerts = [
+				vertexData = numpy.array([
 					0, 0, 
 					1, 0,
 					1, 1,
 					0, 1,
-				]
+				], numpy.float32)
 				vboID = glGenBuffers(1)
 				glBindBuffer(GL_ARRAY_BUFFER, vboID)
-				vertexData = numpy.array(quadVerts, numpy.float32)
 				glBufferData(GL_ARRAY_BUFFER,  4*len(vertexData), vertexData, GL_STATIC_DRAW)
 				glBindBuffer(GL_ARRAY_BUFFER, 0)
 				
-				quadIndices = [
+				indexData = numpy.array([
 					0,1,2,
 					2,3,0
-				]
+				], numpy.byte)
 				iboID = glGenBuffers(1)
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboID)
-				indexData = numpy.array(quadIndices, numpy.byte)
 				glBufferData(GL_ELEMENT_ARRAY_BUFFER, len(indexData), indexData, GL_STATIC_DRAW)
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
