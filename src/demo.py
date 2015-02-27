@@ -10,8 +10,15 @@ import numpy
 import time
 import math
 import os.path
+from PIL import Image
 
 RESOLUTION = [640, 480]
+
+def getRawImage(fname):
+	img = Image.open(fname).convert("RGBA")
+	return (img.size, img.tostring("raw","RGBA"))
+
+	
 
 def compileshader(src, kind):
 	shader = glCreateShader(kind)
@@ -27,7 +34,21 @@ def compileshader(src, kind):
 		shader = 0
 	else:
 		return shader
-def setupquaddemo(fragFile):
+def setupquaddemo(fragFile, texFile=None):
+	texID = 0
+	if texFile:
+		dims, pixels = getRawImage(texFile)
+		
+		texID = glGenTextures(1)
+		glBindTexture(GL_TEXTURE_1D, texID)
+		glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, dims[0], 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels)
+		glBindTexture(GL_TEXTURE_1D, 0)
+		
+		linearFiltering = glGenSamplers(1)
+		glSamplerParameteri(linearFiltering, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+		glSamplerParameteri(linearFiltering, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+		glSamplerParameteri(linearFiltering, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+	
 	vert_shader = 0
 	with open(os.path.abspath("./shaders/justaquad/supersimple.vert"),'r') as vertH:
 		shader_src = vertH.read()
@@ -43,7 +64,6 @@ def setupquaddemo(fragFile):
 		if glIsShader(frag_shader): glDeleteShader(frag_shader)
 		print "Shader creation failed"
 		exit()
-
 	else:
 		program = glCreateProgram()
 		
@@ -66,6 +86,10 @@ def setupquaddemo(fragFile):
 				print "Received the following length-%d log message:\n\t%s" % (infoLen, infoLog)
 				exit()
 			else:
+				iChannel0 = -1
+				if texID:
+					iChannel0 = glGetUniformLocation(program, 'iChannel0')
+					print iChannel0
 				iResolutionUniform = glGetUniformLocation(program, 'iResolution')
 				iGlobalTimeUniform = glGetUniformLocation(program, 'iGlobalTime')
 				
@@ -105,6 +129,13 @@ def setupquaddemo(fragFile):
 					glUniform1f(iGlobalTimeUniform,float(time))
 					glUniform2f(iResolutionUniform,float(resolution[0]),float(resolution[1]))
 					
+					if texID:
+						glUniform1i(iChannel0,0)
+						glActiveTexture(GL_TEXTURE0)
+						glBindTexture(GL_TEXTURE_1D, texID)
+						glBindSampler(0, linearFiltering)
+					
+					
 					glBindVertexArray(vaoID)
 					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboID)
 					
@@ -113,6 +144,9 @@ def setupquaddemo(fragFile):
 					glDrawElements(GL_TRIANGLES, len(indexData), GL_UNSIGNED_BYTE, None)
 					
 				def postRender():
+					glBindSampler(0, 0)
+					glBindTexture(GL_TEXTURE_1D, 0)
+					
 					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 					glBindVertexArray(0)
 				
@@ -121,6 +155,8 @@ def setupquaddemo(fragFile):
 					glBindVertexArray(0)
 					glDeleteBuffers(1,numpy.array(vboID))
 					glDeleteBuffers(1,numpy.array(iboID))
+					glBindTexture(GL_TEXTURE_1D, 0)
+					glDeleteTextures(numpy.array(texID))
 					glDeleteVertexArrays(1,numpy.array(vaoID))
 					glDeleteProgram(program)
 					glDeleteShader(vert_shader)
@@ -177,7 +213,7 @@ def main():
 	if window:
 		glfw.MakeContextCurrent(window)
 		
-		quadFuncs = setupquaddemo("shaunplasma.frag")
+		quadFuncs = setupquaddemo("fractal.frag","textures/gimpTropical.png")
 		quadRender,quadCleanup = quadFuncs[:3],quadFuncs[3]
 		
 		renderloop(window, [quadRender])
